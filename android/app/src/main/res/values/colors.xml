@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dealer brand teal, used to tint FCM notifications -->
+    <color name="notification_color">#0F766E</color>
+	<color name="ic_launcher_background">#082220</color>
+</resources>

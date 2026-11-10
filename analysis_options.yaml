@@ -1,0 +1,31 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    invalid_annotation_target: ignore
+    # Test fixtures read better as plain literals; forcing `const` on every
+    # nested JSON map hurts readability more than a test-only allocation costs.
+    prefer_const_literals_to_create_immutables: ignore
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "tool/**"
+    - "tools/**"
+    - "scratch/**"
+    - "*.dart"
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_print
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - unawaited_futures
+    - use_super_parameters

@@ -1,0 +1,87 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
+    // Uploads R8 mapping file so release crashes are deobfuscated in Crashlytics.
+    id "com.google.firebase.crashlytics"
+}
+
+// Load keystore credentials from key.properties (never commit this file)
+def keystorePropertiesFile = rootProject.file("key.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace = "com.dealer.fleet"
+    compileSdk = 36
+    ndkVersion = "27.0.12077973"
+
+    compileOptions {
+        // Required by flutter_local_notifications (java.time backport).
+        coreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
+    defaultConfig {
+        applicationId = "com.dealer.fleet"
+        // google_maps_flutter + firebase_messaging both require 21+;
+        // flutter_secure_storage's EncryptedSharedPreferences needs 23.
+        minSdkVersion = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+
+        // flutter_local_notifications on older Android needs desugaring.
+        multiDexEnabled = true
+    }
+
+    buildTypes {
+        release {
+            signingConfig = (keystorePropertiesFile.exists() && keystoreProperties['storeFile'] != null) ? signingConfigs.release : signingConfigs.debug
+            minifyEnabled = true
+            shrinkResources = true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            // Mapping upload disabled — Firebase 503 was blocking builds. Re-enable when stable.
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
+        }
+        debug {
+            // Disable Crashlytics in debug so dev noise doesn't pollute the dashboard.
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
+        }
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4"
+}
+
+flutter {
+    source = "../.."
+}
